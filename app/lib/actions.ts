@@ -110,11 +110,14 @@ export async function updateInvoice(
 }
 
 export async function deleteInvoice(id: string) {
-    throw new Error('Failed to Delete Invoice');
-
-    // Unreachable code block
-    await sql`DELETE FROM invoices WHERE id = ${id}`;
-    revalidatePath('/dashboard/invoices');
+    try {
+        await sql`DELETE FROM invoices WHERE id = ${id}`;
+        revalidatePath('/dashboard/invoices');
+    } catch (error) {
+        return {
+            message: 'Database Error: Failed to Delete Invoice.',
+        };
+    }
 }
 
 export async function authenticate(
@@ -123,6 +126,7 @@ export async function authenticate(
 ) {
   try {
     await signIn('credentials', formData);
+    redirect('/dashboard');
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
